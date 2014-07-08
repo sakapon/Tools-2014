@@ -1,8 +1,8 @@
 ﻿<Window x:Class="PortraitClip.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="525">
+        Title="Portrait Clip" Height="600" Width="900" SnapsToDevicePixels="True" Topmost="True" AllowsTransparency="True" WindowStyle="None" Background="#01FFFFFF" BorderBrush="#33000000" BorderThickness="2">
     <Grid>
-        
+    	<Image/>
     </Grid>
 </Window>
