@@ -1,8 +1,13 @@
-﻿<Window x:Class="PortraitClip.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:PortraitClip"
+        x:Class="PortraitClip.MainWindow"
         Title="Portrait Clip" Height="600" Width="900" SnapsToDevicePixels="True" Topmost="True" AllowsTransparency="True" WindowStyle="None" Background="#01FFFFFF" BorderBrush="#33000000" BorderThickness="2">
-    <Grid>
-    	<Image/>
-    </Grid>
+	<Window.DataContext>
+		<local:MainViewModel/>
+	</Window.DataContext>
+	<Grid>
+		<Image Source="{Binding Portrait.ClipBitmap, Mode=OneWay}"/>
+	</Grid>
 </Window>

@@ -23,6 +23,11 @@ namespace PortraitClip
         public MainWindow()
         {
             InitializeComponent();
+
+            Closing += (o, e) =>
+            {
+                ((IDisposable)KinectContext.Current).Dispose();
+            };
         }
     }
 }
