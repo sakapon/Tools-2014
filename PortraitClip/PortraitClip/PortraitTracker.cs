@@ -18,6 +18,12 @@ namespace PortraitClip
             private set { SetValue(value); }
         }
 
+        public bool HasSkeleton
+        {
+            get { return GetValue<bool>(); }
+            private set { SetValue(value); }
+        }
+
         Skeleton[] skeletons;
 
         public PortraitTracker()
@@ -64,6 +70,8 @@ namespace PortraitClip
                             .Where(s => s.TrackingState == SkeletonTrackingState.Tracked)
                             .OrderBy(s => s.Position.Z)
                             .FirstOrDefault();
+
+                        HasSkeleton = skeleton != null;
                         if (skeleton != null)
                         {
                             backgroundRemovedColorStream.SetTrackedPlayer(skeleton.TrackingId);
