@@ -25,6 +25,8 @@ namespace PortraitClip
         }
 
         Skeleton[] skeletons;
+        const int InvalidSkeletonId = -1;
+        ValueShortCache<int> skeletonId = new ValueShortCache<int>(InvalidSkeletonId);
 
         public PortraitTracker()
         {
@@ -72,7 +74,8 @@ namespace PortraitClip
                             .FirstOrDefault();
 
                         HasSkeleton = skeleton != null;
-                        if (skeleton != null)
+                        skeletonId.UpdateValue(skeleton != null ? skeleton.TrackingId : InvalidSkeletonId);
+                        if (skeletonId.Current != InvalidSkeletonId && skeletonId.Previous != skeletonId.Current)
                         {
                             backgroundRemovedColorStream.SetTrackedPlayer(skeleton.TrackingId);
                         }
