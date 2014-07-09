@@ -30,27 +30,26 @@ namespace PortraitClip
             };
 
             var isMouseDown = false;
-            var point = default(Point);
+            var point = new ValueShortCache<Point>(default(Point));
             MouseLeftButtonDown += (o, e) =>
             {
                 isMouseDown = true;
-                point = ScreenManager.GetCursorPosition();
+                point.UpdateValue(ScreenManager.GetCursorPosition());
             };
             MouseMove += (o, e) =>
             {
                 if (!isMouseDown) return;
 
-                var point_old = point;
-                point = ScreenManager.GetCursorPosition();
+                point.UpdateValue(ScreenManager.GetCursorPosition());
 
-                var v = point - point_old;
+                var v = point.Current - point.Previous;
                 Left += v.X;
                 Top += v.Y;
             };
             MouseLeftButtonUp += (o, e) =>
             {
                 isMouseDown = false;
-                point = default(Point);
+                point.UpdateValue(default(Point));
             };
         }
     }
