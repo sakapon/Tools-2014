@@ -28,6 +28,30 @@ namespace PortraitClip
             {
                 ((IDisposable)KinectContext.Current).Dispose();
             };
+
+            var isMouseDown = false;
+            var point = default(Point);
+            MouseLeftButtonDown += (o, e) =>
+            {
+                isMouseDown = true;
+                point = ScreenManager.GetCursorPosition();
+            };
+            MouseMove += (o, e) =>
+            {
+                if (!isMouseDown) return;
+
+                var point_old = point;
+                point = ScreenManager.GetCursorPosition();
+
+                var v = point - point_old;
+                Left += v.X;
+                Top += v.Y;
+            };
+            MouseLeftButtonUp += (o, e) =>
+            {
+                isMouseDown = false;
+                point = default(Point);
+            };
         }
     }
 }
