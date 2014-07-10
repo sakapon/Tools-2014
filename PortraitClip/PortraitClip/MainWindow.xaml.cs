@@ -26,7 +26,7 @@ namespace PortraitClip
 
             Closing += (o, e) =>
             {
-                ((IDisposable)KinectContext.Current).Dispose();
+                ((MainViewModel)DataContext).Portrait.Dispose();
             };
 
             var isMouseDown = false;

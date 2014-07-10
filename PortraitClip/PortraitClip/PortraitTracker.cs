@@ -1,5 +1,6 @@
 ﻿using KLibrary.ComponentModel;
 using Microsoft.Kinect;
+using Microsoft.Kinect.Toolkit;
 using Microsoft.Kinect.Toolkit.BackgroundRemoval;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,17 @@ using System.Windows.Media.Imaging;
 
 namespace PortraitClip
 {
-    public class PortraitTracker : NotifyBase
+    public class PortraitTracker : NotifyBase, IDisposable
     {
+        const ColorImageFormat TheColorImageFormat = ColorImageFormat.RgbResolution640x480Fps30;
+        const DepthImageFormat TheDepthImageFormat = DepthImageFormat.Resolution320x240Fps30;
+        const int InvalidSkeletonId = -1;
+
+        KinectSensorChooser sensorChooser;
+        BackgroundRemovedColorStream backgroundRemovedColorStream;
+        Skeleton[] skeletons;
+        ValueShortCache<int> skeletonId = new ValueShortCache<int>(InvalidSkeletonId);
+
         public WriteableBitmap ClipBitmap
         {
             get { return GetValue<WriteableBitmap>(); }
@@ -24,19 +34,107 @@ namespace PortraitClip
             private set { SetValue(value); }
         }
 
-        Skeleton[] skeletons;
-        const int InvalidSkeletonId = -1;
-        ValueShortCache<int> skeletonId = new ValueShortCache<int>(InvalidSkeletonId);
-
         public PortraitTracker()
         {
-            KinectContext.Current.AllFramesReady += Context_AllFramesReady;
-            KinectContext.Current.BackgroundRemovedFrameReady += BackgroundRemovedFrameReady;
+            sensorChooser = new KinectSensorChooser();
+            sensorChooser.KinectChanged += KinectChanged;
+            sensorChooser.Start();
         }
 
-        void Context_AllFramesReady(object sender, AllFramesReadyEventArgs e)
+        ~PortraitTracker()
         {
-            var backgroundRemovedColorStream = KinectContext.Current.BackgroundRemovedColorStream;
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            try
+            {
+                if (backgroundRemovedColorStream != null)
+                {
+                    backgroundRemovedColorStream.BackgroundRemovedFrameReady -= BackgroundRemovedFrameReady;
+                    backgroundRemovedColorStream.Dispose();
+                    backgroundRemovedColorStream = null;
+                }
+
+                if (sensorChooser.Status == ChooserStatus.SensorStarted)
+                {
+                    sensorChooser.Stop();
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        void KinectChanged(object sender, KinectChangedEventArgs e)
+        {
+            if (e.OldSensor != null)
+            {
+                try
+                {
+                    if (backgroundRemovedColorStream != null)
+                    {
+                        backgroundRemovedColorStream.BackgroundRemovedFrameReady -= BackgroundRemovedFrameReady;
+                        backgroundRemovedColorStream.Dispose();
+                        backgroundRemovedColorStream = null;
+                    }
+
+                    e.OldSensor.AllFramesReady -= AllFramesReady;
+                    e.OldSensor.ColorStream.Disable();
+                    e.OldSensor.DepthStream.Disable();
+                    e.OldSensor.SkeletonStream.Disable();
+                }
+                catch (InvalidOperationException)
+                {
+                    // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
+                    // E.g.: sensor might be abruptly unplugged.
+                }
+            }
+
+            if (e.NewSensor != null)
+            {
+                try
+                {
+                    e.NewSensor.ColorStream.Enable(TheColorImageFormat);
+                    e.NewSensor.DepthStream.Enable(TheDepthImageFormat);
+                    e.NewSensor.SkeletonStream.Enable();
+
+                    try
+                    {
+                        e.NewSensor.DepthStream.Range = DepthRange.Near;
+                        e.NewSensor.SkeletonStream.EnableTrackingInNearRange = true;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // Non Kinect for Windows devices do not support Near mode, so reset back to default mode.
+                        e.NewSensor.DepthStream.Range = DepthRange.Default;
+                        e.NewSensor.SkeletonStream.EnableTrackingInNearRange = false;
+                    }
+                    e.NewSensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
+
+                    backgroundRemovedColorStream = new BackgroundRemovedColorStream(e.NewSensor);
+                    backgroundRemovedColorStream.Enable(TheColorImageFormat, TheDepthImageFormat);
+
+                    e.NewSensor.AllFramesReady += AllFramesReady;
+                    backgroundRemovedColorStream.BackgroundRemovedFrameReady += BackgroundRemovedFrameReady;
+                }
+                catch (InvalidOperationException)
+                {
+                    // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
+                    // E.g.: sensor might be abruptly unplugged.
+                }
+            }
+        }
+
+        void AllFramesReady(object sender, AllFramesReadyEventArgs e)
+        {
             if (backgroundRemovedColorStream == null) return;
 
             try
@@ -89,16 +187,22 @@ namespace PortraitClip
 
         void BackgroundRemovedFrameReady(object sender, BackgroundRemovedColorFrameReadyEventArgs e)
         {
-            using (var bf = e.OpenBackgroundRemovedColorFrame())
+            try
             {
-                if (bf != null)
+                using (var bf = e.OpenBackgroundRemovedColorFrame())
                 {
-                    if (ClipBitmap == null)
+                    if (bf != null)
                     {
-                        ClipBitmap = new WriteableBitmap(bf.Width, bf.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
+                        if (ClipBitmap == null)
+                        {
+                            ClipBitmap = new WriteableBitmap(bf.Width, bf.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
+                        }
+                        ClipBitmap.WritePixels(new Int32Rect(0, 0, ClipBitmap.PixelWidth, ClipBitmap.PixelHeight), bf.GetRawPixelData(), 4 * ClipBitmap.PixelWidth, 0);
                     }
-                    ClipBitmap.WritePixels(new Int32Rect(0, 0, ClipBitmap.PixelWidth, ClipBitmap.PixelHeight), bf.GetRawPixelData(), 4 * ClipBitmap.PixelWidth, 0);
                 }
+            }
+            catch (InvalidOperationException)
+            {
             }
         }
     }
