@@ -4,6 +4,9 @@
         xmlns:local="clr-namespace:PortraitClip"
         x:Class="PortraitClip.MainWindow"
         Title="Portrait Clip" Height="600" Width="900" SnapsToDevicePixels="True" Topmost="True" AllowsTransparency="True" WindowStyle="None" Background="{Binding BackgroundBrush, Mode=OneWay}" BorderBrush="{Binding BorderBrush, Mode=OneWay}" BorderThickness="2">
+    <WindowChrome.WindowChrome>
+        <WindowChrome ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
 	<Window.DataContext>
 		<local:MainViewModel/>
 	</Window.DataContext>

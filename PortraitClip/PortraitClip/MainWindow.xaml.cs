@@ -24,14 +24,21 @@ namespace PortraitClip
         {
             InitializeComponent();
 
+            var vm = (MainViewModel)DataContext;
+
             Closing += (o, e) =>
             {
-                ((MainViewModel)DataContext).Portrait.Dispose();
+                vm.Portrait.Dispose();
             };
 
             MouseLeftButtonDown += (o, e) =>
             {
                 DragMove();
+            };
+
+            MouseRightButtonUp += (o, e) =>
+            {
+                vm.ShowBorder = !vm.ShowBorder;
             };
         }
     }

@@ -30,18 +30,26 @@ namespace PortraitClip
             private set { SetValue(value); }
         }
 
+        public bool ShowBorder
+        {
+            get { return GetValue<bool>(); }
+            set { SetValue(value); }
+        }
+
         public MainViewModel()
         {
             Portrait = new PortraitTracker();
 
-            BackgroundBrush = OpaqueBackground;
-            BorderBrush = OpaqueBorder;
+            RefreshBorder();
+            Portrait.AddPropertyChangedHandler("HasSkeleton", () => RefreshBorder());
+            AddPropertyChangedHandler("ShowBorder", () => RefreshBorder());
+        }
 
-            Portrait.AddPropertyChangedHandler("HasSkeleton", () =>
-            {
-                BackgroundBrush = Portrait.HasSkeleton ? Transparent : OpaqueBackground;
-                BorderBrush = Portrait.HasSkeleton ? Transparent : OpaqueBorder;
-            });
+        void RefreshBorder()
+        {
+            var showBorder = ShowBorder || !Portrait.HasSkeleton;
+            BackgroundBrush = showBorder ? OpaqueBackground : Transparent;
+            BorderBrush = showBorder ? OpaqueBorder : Transparent;
         }
     }
 }
