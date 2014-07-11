@@ -3,14 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:PortraitClip"
         x:Class="PortraitClip.MainWindow"
-        Title="Portrait Clip" Height="600" Width="900" SnapsToDevicePixels="True" Topmost="True" AllowsTransparency="True" WindowStyle="None" Background="{Binding BackgroundBrush, Mode=OneWay}" BorderBrush="{Binding BorderBrush, Mode=OneWay}" BorderThickness="2">
+        Title="Portrait Clip" Height="600" Width="900" SnapsToDevicePixels="True" Topmost="True" AllowsTransparency="True" WindowStyle="None" Background="{Binding BackgroundBrush, Mode=OneWay}">
     <WindowChrome.WindowChrome>
         <WindowChrome ResizeBorderThickness="12"/>
     </WindowChrome.WindowChrome>
 	<Window.DataContext>
 		<local:MainViewModel/>
 	</Window.DataContext>
-	<Grid>
+	<Border BorderBrush="{Binding BorderBrush, Mode=OneWay}" BorderThickness="2" Margin="5">
 		<Image Source="{Binding Portrait.ClipBitmap, Mode=OneWay}"/>
-	</Grid>
+	</Border>
 </Window>
