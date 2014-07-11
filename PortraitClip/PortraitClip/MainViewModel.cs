@@ -10,7 +10,7 @@ namespace PortraitClip
     {
         static readonly SolidColorBrush Transparent = new SolidColorBrush(Colors.Transparent);
         static readonly SolidColorBrush OpaqueBackground = new SolidColorBrush(Color.FromArgb(1, 255, 255, 255));
-        static readonly SolidColorBrush OpaqueBorder = new SolidColorBrush(Colors.CornflowerBlue);
+        static readonly SolidColorBrush OpaqueBorder = new SolidColorBrush(Color.FromArgb(128, 16, 48, 224));
 
         public PortraitTracker Portrait
         {
