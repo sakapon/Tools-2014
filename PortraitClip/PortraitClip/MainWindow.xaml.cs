@@ -26,6 +26,11 @@ namespace PortraitClip
 
             var vm = (MainViewModel)DataContext;
 
+            CloseButton.Click += (o, e) =>
+            {
+                Close();
+            };
+
             Closing += (o, e) =>
             {
                 vm.Portrait.Dispose();
