@@ -10,7 +10,7 @@ namespace PortraitClip
     {
         static readonly SolidColorBrush Transparent = new SolidColorBrush(Colors.Transparent);
         static readonly SolidColorBrush OpaqueBackground = new SolidColorBrush(Color.FromArgb(1, 255, 255, 255));
-        static readonly SolidColorBrush OpaqueBorder = new SolidColorBrush(Color.FromArgb(51, 0, 0, 0));
+        static readonly SolidColorBrush OpaqueBorder = new SolidColorBrush(Color.FromArgb(128, 16, 48, 224));
 
         public PortraitTracker Portrait
         {
@@ -18,30 +18,34 @@ namespace PortraitClip
             private set { SetValue(value); }
         }
 
-        public SolidColorBrush BackgroundBrush
+        public bool IsSettingMode
         {
-            get { return GetValue<SolidColorBrush>(); }
-            private set { SetValue(value); }
+            get { return GetValue<bool>(); }
+            set { SetValue(value); }
         }
 
+        [DependentOn("IsSettingMode")]
+        public bool ShowBorder
+        {
+            get { return IsSettingMode || !Portrait.HasSkeleton; }
+        }
+
+        [DependentOn("ShowBorder")]
+        public SolidColorBrush BackgroundBrush
+        {
+            get { return ShowBorder ? OpaqueBackground : Transparent; }
+        }
+
+        [DependentOn("ShowBorder")]
         public SolidColorBrush BorderBrush
         {
-            get { return GetValue<SolidColorBrush>(); }
-            private set { SetValue(value); }
+            get { return ShowBorder ? OpaqueBorder : Transparent; }
         }
 
         public MainViewModel()
         {
             Portrait = new PortraitTracker();
-
-            BackgroundBrush = OpaqueBackground;
-            BorderBrush = OpaqueBorder;
-
-            Portrait.AddPropertyChangedHandler("HasSkeleton", () =>
-            {
-                BackgroundBrush = Portrait.HasSkeleton ? Transparent : OpaqueBackground;
-                BorderBrush = Portrait.HasSkeleton ? Transparent : OpaqueBorder;
-            });
+            Portrait.AddPropertyChangedHandler("HasSkeleton", () => NotifyPropertyChanged("ShowBorder"));
         }
     }
 }
