@@ -43,7 +43,7 @@ namespace PortraitClip
 
             MouseRightButtonUp += (o, e) =>
             {
-                vm.ShowBorder = !vm.ShowBorder;
+                vm.IsSettingMode = !vm.IsSettingMode;
             };
         }
     }

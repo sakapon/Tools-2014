@@ -18,38 +18,34 @@ namespace PortraitClip
             private set { SetValue(value); }
         }
 
-        public SolidColorBrush BackgroundBrush
-        {
-            get { return GetValue<SolidColorBrush>(); }
-            private set { SetValue(value); }
-        }
-
-        public SolidColorBrush BorderBrush
-        {
-            get { return GetValue<SolidColorBrush>(); }
-            private set { SetValue(value); }
-        }
-
-        public bool ShowBorder
+        public bool IsSettingMode
         {
             get { return GetValue<bool>(); }
             set { SetValue(value); }
         }
 
+        [DependentOn("IsSettingMode")]
+        public bool ShowBorder
+        {
+            get { return IsSettingMode || !Portrait.HasSkeleton; }
+        }
+
+        [DependentOn("ShowBorder")]
+        public SolidColorBrush BackgroundBrush
+        {
+            get { return ShowBorder ? OpaqueBackground : Transparent; }
+        }
+
+        [DependentOn("ShowBorder")]
+        public SolidColorBrush BorderBrush
+        {
+            get { return ShowBorder ? OpaqueBorder : Transparent; }
+        }
+
         public MainViewModel()
         {
             Portrait = new PortraitTracker();
-
-            RefreshBorder();
-            Portrait.AddPropertyChangedHandler("HasSkeleton", () => RefreshBorder());
-            AddPropertyChangedHandler("ShowBorder", () => RefreshBorder());
-        }
-
-        void RefreshBorder()
-        {
-            var showBorder = ShowBorder || !Portrait.HasSkeleton;
-            BackgroundBrush = showBorder ? OpaqueBackground : Transparent;
-            BorderBrush = showBorder ? OpaqueBorder : Transparent;
+            Portrait.AddPropertyChangedHandler("HasSkeleton", () => NotifyPropertyChanged("ShowBorder"));
         }
     }
 }
