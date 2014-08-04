@@ -3,6 +3,7 @@
 The project to create tools.
 
 ## [Portrait Clip](https://github.com/sakapon/Tools-2014/wiki/Portrait-Clip)
-The desktop app to clip a person (remove background) from the camera capture, using Kinect for Windows.
+The desktop app to clip a person (remove background) from the camera capture, using Kinect for Windows.  
+See [details](https://github.com/sakapon/Tools-2014/wiki/Portrait-Clip).
 
 ![Portrait Clip](Images/PortraitClip/Normal.png)
